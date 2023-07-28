@@ -38,46 +38,19 @@ class RandomGraph:
 
 
     def bfs(self, start= 0, target = None):
-        # Set of visited nodes to prevent loops
-        visited = set()
-        queue = Queue()
-        
-        if target is None:
-            target = len(self.graph.nodes)- 1 
-
-        # Add the start to the queue and visited list
-
-        queue.put(start)
-        visited.add(start)
-
-        # start has not parents
-        parent = dict()
-        parent[start] = None
-
-        # Perform step 3
-        path_found = False
-        while not queue.empty():
-            current_node = queue.get()
-            if len(parent) == 10:
-                path_found = True
-                break
-            # if queue.qsize() == len(self.graph.nodes):
-            #     path_found = True
-            #     break
-
-            for next_node in self.graph.adj.get(current_node):
-                if next_node not in visited:
-                    queue.put(next_node)
-                    parent[next_node] = current_node
-                    visited.add(next_node)
-
-        # Path reconstruction
-        print(f"parent: {parent}")
-        path = []
-        if path_found:
-            path.append(target)
-            while parent[target] is not None:
-                path.append(parent[target])
-                target = parent[target]
-            path.reverse()
+        # Paso 1: Agregar Raiz
+        path = [start]
+        nextlevel = [start]
+        # Paso 2: Recorrer todos los nodos del siguiente nivel
+        while nextlevel:
+            thislevel = nextlevel
+            nextlevel = []
+            for v in thislevel:
+                for w in self.graph.adj.get(v):
+                    if w not in path:
+                        path.append(w)
+                        # Paso 3: Cambiar de nivel
+                        nextlevel.append(w)
+                if len(path) == len(self.graph.nodes):
+                    return path
         return path
