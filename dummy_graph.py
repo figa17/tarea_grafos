@@ -23,16 +23,18 @@ class RandomGraph:
         if path is None:
             path = []
 
+        # Paso 1: Agregar Raiz
         path.append(start)
         visited.add(start)
         if len(path) == len(self.graph.nodes):
             return path
+        # Paso 2: Recorrer cada arista adyacente y agregar nodo no visitado
         for neighbour in self.graph.adj.get(start):
             if neighbour not in visited:
+                # Paso 3: Realizar recorrido con nodo adyacente
                 result = self.dfs(neighbour, target, path, visited)
                 if result is not None:
                     return result
-        # path.pop()
         return None
 
 
