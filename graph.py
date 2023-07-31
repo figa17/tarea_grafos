@@ -1,85 +1,58 @@
 from queue import Queue
+import networkx as nx
+import matplotlib.pyplot as plt
+from networkx.generators.random_graphs import erdos_renyi_graph
+import random
 
 
-class Graph:
+class RandomGraph:
     # Constructor
-    def __init__(self, num_of_nodes, directed=True):
-        self.m_num_of_nodes = num_of_nodes
-        self.m_nodes = range(self.m_num_of_nodes)
+    def __init__(self, num_of_nodes, directed=True, seed = random.seed(246)):
+        self.graph = erdos_renyi_graph(num_of_nodes, p = 0.5, directed = directed, seed = seed)
+        
+    def view_graph(self):
+        nx.draw(self.graph, with_labels=True)
+        plt.show()
 
-        # Directed or Undirected
-        self.m_directed = directed
-
-        # Graph representation - Adjacency list
-        # We use a dictionary to implement an adjacency list
-        self.m_adj_list = {node: set() for node in self.m_nodes}
-
-        # Add edge to the graph
-
-    def add_edge(self, node1, node2, weight=1):
-        self.m_adj_list[node1].add((node2, weight))
-
-        if not self.m_directed:
-            self.m_adj_list[node2].add((node1, weight))
-
-    # Print the graph representation
-    def print_adj_list(self):
-        for key in self.m_adj_list.keys():
-            print("node", key, ": ", self.m_adj_list[key])
-
-    def bfs(self, start_node, target_node):
-        # Set of visited nodes to prevent loops
-        visited = set()
-        queue = Queue()
-
-        # Add the start_node to the queue and visited list
-
-        queue.put(start_node)
-        visited.add(start_node)
-
-        # start_node has not parents
-        parent = dict()
-        parent[start_node] = None
-
-        # Perform step 3
-        path_found = False
-        while not queue.empty():
-            current_node = queue.get()
-            if current_node == target_node:
-                path_found = True
-                break
-
-            for (next_node, weight) in self.m_adj_list[current_node]:
-                if next_node not in visited:
-                    queue.put(next_node)
-                    parent[next_node] = current_node
-                    visited.add(next_node)
-
-        # Path reconstruction
-        path = []
-        if path_found:
-            path.append(target_node)
-            while parent[target_node] is not None:
-                path.append(parent[target_node])
-                target_node = parent[target_node]
-            path.reverse()
-        return path
-
-    def dfs(self, start, target, path=None, visited=None):
+    def dfs(self, start=0, target=None, path=None, visited=None):
 
         if visited is None:
             visited = set()
+        if target is None:
+            target = len(self.graph.nodes)- 1 
         if path is None:
             path = []
 
+        # Paso 1: Agregar Raiz
         path.append(start)
         visited.add(start)
-        if start == target:
+        if len(path) == len(self.graph.nodes):
             return path
-        for (neighbour, weight) in self.m_adj_list[start]:
+        # Paso 2: Recorrer cada arista adyacente y agregar nodo no visitado
+        for neighbour in self.graph.adj.get(start):
             if neighbour not in visited:
+                # Paso 3: Realizar recorrido con nodo adyacente
                 result = self.dfs(neighbour, target, path, visited)
                 if result is not None:
                     return result
-        path.pop()
         return None
+
+
+
+    def bfs(self, start= 0, target = None):
+        # Paso 1: Agregar Raiz
+        path = [start]
+        nextlevel = [start]
+        # Paso 2: Recorrer todos los nodos del siguiente nivel
+        while nextlevel:
+            thislevel = nextlevel
+            nextlevel = []
+            for v in thislevel:
+                for w in self.graph.adj.get(v):
+                    if w not in path:
+                        path.append(w)
+                        # Paso 3: Cambiar de nivel
+                        nextlevel.append(w)
+                if len(path) == len(self.graph.nodes):
+                    return path
+        return path
